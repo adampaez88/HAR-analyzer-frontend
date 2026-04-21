@@ -8,3 +8,7 @@ Features:
 - Charts
 - Endpoint mismatch drawer
 - Export JSON / CSV
+
+
+Uses Backend API:
+https://github.com/adampaez88/HAR-analyzer-backend
