@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import UploadSection from "./components/UploadSection";
 import SearchBar from "./components/SearchBar";
 import SummaryCards from "./components/SummaryCards";
+import ExportButtons from "./components/ExportButtons";
 
 import {
   ResponsiveContainer,
@@ -507,59 +508,10 @@ function App() {
 
         {/* Export Buttons */}
         {result && (
-          <div
-            style={{
-              display:
-                "flex",
-              gap: "10px",
-              marginTop:
-                "25px",
-            }}
-          >
-            <button
-              onClick={
-                exportJson
-              }
-              style={{
-                padding:
-                  "10px 16px",
-                border:
-                  "none",
-                borderRadius:
-                  "8px",
-                background:
-                  "#2563eb",
-                color:
-                  "white",
-                cursor:
-                  "pointer",
-              }}
-            >
-              Export JSON
-            </button>
-
-            <button
-              onClick={
-                exportCsv
-              }
-              style={{
-                padding:
-                  "10px 16px",
-                border:
-                  "none",
-                borderRadius:
-                  "8px",
-                background:
-                  "#16a34a",
-                color:
-                  "white",
-                cursor:
-                  "pointer",
-              }}
-            >
-              Export CSV
-            </button>
-          </div>
+          <ExportButtons
+            exportJson={exportJson}
+            exportCsv={exportCsv}
+          />
         )}
 
         {/* Charts */}
