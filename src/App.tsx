@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
+import UploadSection from "./components/UploadSection";
 
 import {
   ResponsiveContainer,
@@ -464,162 +465,30 @@ function App() {
         </h1>
 
         {/* Upload */}
-        <div
-          style={{
-            ...cardStyle,
-            marginTop: "25px",
-          }}
-        >
-          <h2>
-            Upload HAR Files
-          </h2>
+        <UploadSection
+          fileA={fileA}
+          fileB={fileB}
+          loading={loading}
+          dragTarget={dragTarget}
+          setFileA={setFileA}
+          setFileB={setFileB}
+          setDragTarget={setDragTarget}
+          handleDrop={handleDrop}
+          handleCompare={handleCompare}
+        />
 
-          <div
+        {error && (
+          <p
             style={{
-              display: "flex",
-              gap: "20px",
-              flexWrap: "wrap",
+              color:
+                "#ef4444",
+              marginTop:
+                "12px",
             }}
           >
-            <div
-              onDragOver={(e) =>
-                e.preventDefault()
-              }
-              onDragEnter={() =>
-                setDragTarget(
-                  "file1"
-                )
-              }
-              onDragLeave={() =>
-                setDragTarget(
-                  null
-                )
-              }
-              onDrop={(e) =>
-                handleDrop(
-                  e,
-                  "file1"
-                )
-              }
-              style={uploadBox(
-                dragTarget ===
-                  "file1"
-              )}
-            >
-              <p>
-                Drop File 1
-                Here
-              </p>
-
-              <input
-                type="file"
-                accept=".har"
-                onChange={(e) =>
-                  setFileA(
-                    e.target
-                      .files?.[0] ||
-                      null
-                  )
-                }
-              />
-
-              <p>
-                {fileA?.name}
-              </p>
-            </div>
-
-            <div
-              onDragOver={(e) =>
-                e.preventDefault()
-              }
-              onDragEnter={() =>
-                setDragTarget(
-                  "file2"
-                )
-              }
-              onDragLeave={() =>
-                setDragTarget(
-                  null
-                )
-              }
-              onDrop={(e) =>
-                handleDrop(
-                  e,
-                  "file2"
-                )
-              }
-              style={uploadBox(
-                dragTarget ===
-                  "file2"
-              )}
-            >
-              <p>
-                Drop File 2
-                Here
-              </p>
-
-              <input
-                type="file"
-                accept=".har"
-                onChange={(e) =>
-                  setFileB(
-                    e.target
-                      .files?.[0] ||
-                      null
-                  )
-                }
-              />
-
-              <p>
-                {fileB?.name}
-              </p>
-            </div>
-
-            <div>
-              <button
-                onClick={
-                  handleCompare
-                }
-                disabled={
-                  loading
-                }
-                style={{
-                  marginTop:
-                    "30px",
-                  padding:
-                    "12px 20px",
-                  border:
-                    "none",
-                  borderRadius:
-                    "8px",
-                  background:
-                    "#2563eb",
-                  color:
-                    "white",
-                  cursor:
-                    "pointer",
-                }}
-              >
-                {loading
-                  ? "Comparing..."
-                  : "Compare"}
-              </button>
-            </div>
-          </div>
-
-          {error && (
-            <p
-              style={{
-                color:
-                  "#ef4444",
-                marginTop:
-                  "12px",
-              }}
-            >
-              {error}
-            </p>
-          )}
-        </div>
+            {error}
+          </p>
+        )}
 
         {/* Search */}
         {result && (
