@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import UploadSection from "./components/UploadSection";
+import SearchBar from "./components/SearchBar";
 
 import {
   ResponsiveContainer,
@@ -492,39 +493,10 @@ function App() {
 
         {/* Search */}
         {result && (
-          <div
-            style={{
-              ...cardStyle,
-              marginTop: "25px",
-            }}
-          >
-            <input
-              type="text"
-              placeholder="Search endpoints..."
-              value={
-                searchTerm
-              }
-              onChange={(e) =>
-                setSearchTerm(
-                  e.target.value
-                )
-              }
-              style={{
-                width:
-                  "95%",
-                padding:
-                  "12px",
-                borderRadius:
-                  "8px",
-                border:
-                  "1px solid #334155",
-                background:
-                  "#0f172a",
-                color:
-                  "white",
-              }}
-            />
-          </div>
+          <SearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
         )}
 
         {/* Summary */}
