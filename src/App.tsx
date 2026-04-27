@@ -2,6 +2,7 @@ import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import UploadSection from "./components/UploadSection";
 import SearchBar from "./components/SearchBar";
+import SummaryCards from "./components/SummaryCards";
 
 import {
   ResponsiveContainer,
@@ -501,77 +502,7 @@ function App() {
 
         {/* Summary */}
         {result && (
-          <div
-            style={{
-              display:
-                "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(220px,1fr))",
-              gap: "20px",
-              marginTop:
-                "25px",
-            }}
-          >
-            {[
-              {
-                label:
-                  "File 1 Requests",
-                value:
-                  result.summary
-                    .file1TotalRequests,
-              },
-              {
-                label:
-                  "File 2 Requests",
-                value:
-                  result.summary
-                    .file2TotalRequests,
-              },
-              {
-                label:
-                  "Mismatches",
-                value:
-                  result.summary
-                    .statusMismatches,
-              },
-              {
-                label:
-                  "Unique URLs",
-                value:
-                  result.summary
-                    .uniqueUrlsFile1,
-              },
-            ].map(
-              (
-                card,
-                i
-              ) => (
-                <div
-                  key={i}
-                  style={
-                    cardStyle
-                  }
-                >
-                  <p
-                    style={{
-                      color:
-                        "#94a3b8",
-                    }}
-                  >
-                    {
-                      card.label
-                    }
-                  </p>
-
-                  <h2>
-                    {
-                      card.value
-                    }
-                  </h2>
-                </div>
-              )
-            )}
-          </div>
+          <SummaryCards result={result} />
         )}
 
         {/* Export Buttons */}
