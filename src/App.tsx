@@ -6,6 +6,7 @@ import SummaryCards from "./components/SummaryCards";
 import ExportButtons from "./components/ExportButtons";
 import ChartsSection from "./components/ChartsSection";
 import WorstEndpointsTable from "./components/WorstEndpointsTable";
+import MismatchTable from "./components/MismatchTable";
 
 
 function App() {
@@ -389,14 +390,6 @@ function App() {
   // ------------------------------------
   // Styles
   // ------------------------------------
-  const cardStyle = {
-    background: "#1e293b",
-    padding: "20px",
-    borderRadius: "14px",
-    boxShadow:
-      "0 0 0 1px #334155",
-  };
-
   const tableStyle = {
     width: "100%",
     borderCollapse:
@@ -413,23 +406,6 @@ function App() {
     textAlign:
       "left" as const,
   };
-
-  const uploadBox = (
-    active: boolean
-  ) => ({
-    border: active
-      ? "2px dashed #3b82f6"
-      : "2px dashed #334155",
-    borderRadius: "14px",
-    padding: "22px",
-    width: "280px",
-    background: active
-      ? "#172554"
-      : "#0f172a",
-    cursor: "pointer",
-    transition:
-      "all 0.2s ease",
-  });
 
   return (
     <div
@@ -528,123 +504,15 @@ function App() {
 
         {/* Mismatch Table */}
         {result && (
-          <>
-            <h2
-              style={{
-                marginTop:
-                  "35px",
-              }}
-            >
-              Status Mismatches
-            </h2>
-
-            <table
-              style={
-                tableStyle
-              }
-            >
-              <thead>
-                <tr>
-                  <th
-                    style={{
-                      ...thtd,
-                      cursor:
-                        "pointer",
-                    }}
-                    onClick={() => {
-                      setMismatchSortField(
-                        "url"
-                      );
-                      setMismatchSortAsc(
-                        !mismatchSortAsc
-                      );
-                    }}
-                  >
-                    URL ↕
-                  </th>
-
-                  <th
-                    style={{
-                      ...thtd,
-                      cursor:
-                        "pointer",
-                    }}
-                    onClick={() => {
-                      setMismatchSortField(
-                        "count"
-                      );
-                      setMismatchSortAsc(
-                        !mismatchSortAsc
-                      );
-                    }}
-                  >
-                    Count ↕
-                  </th>
-
-                  <th
-                    style={
-                      thtd
-                    }
-                  >
-                    Inspect
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredMismatch.map(
-                  (
-                    item: any,
-                    i: number
-                  ) => (
-                    <tr
-                      key={i}
-                      onClick={() =>
-                        setSelectedEndpoint(
-                          item
-                        )
-                      }
-                      style={{
-                        cursor:
-                          "pointer",
-                      }}
-                    >
-                      <td
-                        style={
-                          thtd
-                        }
-                      >
-                        {
-                          item.url
-                        }
-                      </td>
-
-                      <td
-                        style={
-                          thtd
-                        }
-                      >
-                        {
-                          item
-                            .file1Requests
-                            .length
-                        }
-                      </td>
-
-                      <td
-                        style={
-                          thtd
-                        }
-                      >
-                        →
-                      </td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </table>
-          </>
+          <MismatchTable
+            filteredMismatch={filteredMismatch}
+            mismatchSortAsc={mismatchSortAsc}
+            setMismatchSortAsc={setMismatchSortAsc}
+            setMismatchSortField={setMismatchSortField}
+            setSelectedEndpoint={setSelectedEndpoint}
+          />
         )}
+
       </div>
 
       {/* Drawer */}
