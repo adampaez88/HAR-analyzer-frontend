@@ -5,16 +5,8 @@ import SearchBar from "./components/SearchBar";
 import SummaryCards from "./components/SummaryCards";
 import ExportButtons from "./components/ExportButtons";
 import ChartsSection from "./components/ChartsSection";
+import WorstEndpointsTable from "./components/WorstEndpointsTable";
 
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
 
 function App() {
   const [fileA, setFileA] = useState<File | null>(null);
@@ -525,127 +517,13 @@ function App() {
 
         {/* Worst Endpoints */}
         {result && (
-          <>
-            <h2
-              style={{
-                marginTop:
-                  "35px",
-              }}
-            >
-              Worst Endpoints
-            </h2>
-
-            <table
-              style={
-                tableStyle
-              }
-            >
-              <thead>
-                <tr>
-                  <th
-                    style={{
-                      ...thtd,
-                      cursor:
-                        "pointer",
-                    }}
-                    onClick={() => {
-                      setWorstSortField(
-                        "url"
-                      );
-                      setWorstSortAsc(
-                        !worstSortAsc
-                      );
-                    }}
-                  >
-                    URL ↕
-                  </th>
-
-                  <th
-                    style={{
-                      ...thtd,
-                      cursor:
-                        "pointer",
-                    }}
-                    onClick={() => {
-                      setWorstSortField(
-                        "failure"
-                      );
-                      setWorstSortAsc(
-                        !worstSortAsc
-                      );
-                    }}
-                  >
-                    Failure ↕
-                  </th>
-
-                  <th
-                    style={
-                      thtd
-                    }
-                  >
-                    File 2 Failure
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredWorst.map(
-                  (
-                    item: any,
-                    i: number
-                  ) => (
-                    <tr
-                      key={i}
-                    >
-                      <td
-                        style={
-                          thtd
-                        }
-                      >
-                        {
-                          item.url
-                        }
-                      </td>
-
-                      <td
-                        style={{
-                          ...thtd,
-                          color:
-                            getFailureColor(
-                              item
-                                .file1
-                                .failureRate
-                            ),
-                        }}
-                      >
-                        {item.file1.failureRate.toFixed(
-                          2
-                        )}
-                      </td>
-
-                      <td
-                        style={{
-                          ...thtd,
-                          color:
-                            getFailureColor(
-                              item
-                                .file2
-                                ?.failureRate ??
-                                0
-                            ),
-                        }}
-                      >
-                        {item.file2?.failureRate?.toFixed(
-                          2
-                        ) ||
-                          "N/A"}
-                      </td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </table>
-          </>
+          <WorstEndpointsTable
+            filteredWorst={filteredWorst}
+            worstSortAsc={worstSortAsc}
+            setWorstSortAsc={setWorstSortAsc}
+            setWorstSortField={setWorstSortField}
+            getFailureColor={getFailureColor}
+          />
         )}
 
         {/* Mismatch Table */}
