@@ -12,7 +12,9 @@ import EndpointDrawer from "./components/EndpointDrawer";
 import type {
   HarResult,
   MismatchItem,
-  WorstEndpointItem
+  MismatchSortField,
+  WorstEndpointItem,
+  WorstSortField
 } from "./types";
 
 import {
@@ -46,12 +48,12 @@ function App() {
   >(null);
 
   const [worstSortField, setWorstSortField] =
-    useState("failure");
+      useState<WorstSortField>("failure");
   const [worstSortAsc, setWorstSortAsc] =
     useState(false);
 
   const [mismatchSortField, setMismatchSortField] =
-    useState("url");
+      useState<MismatchSortField>("url");
   const [mismatchSortAsc, setMismatchSortAsc] =
     useState(true);
 

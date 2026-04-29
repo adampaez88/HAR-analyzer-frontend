@@ -41,3 +41,6 @@ export interface DiffRow {
   req2?: RequestEntry;
   result: string;
 }
+
+export type WorstSortField = "url" | "failure";
+export type MismatchSortField = "url" | "count";
