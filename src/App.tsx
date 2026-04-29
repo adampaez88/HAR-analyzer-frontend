@@ -9,6 +9,13 @@ import WorstEndpointsTable from "./components/WorstEndpointsTable";
 import MismatchTable from "./components/MismatchTable";
 import EndpointDrawer from "./components/EndpointDrawer";
 
+import {
+  getFailureColor,
+  renderBadge,
+  buildDiffRows,
+  sortBy,
+} from "./utils/helpers";
+
 
 function App() {
   const [fileA, setFileA] = useState<File | null>(null);
@@ -99,133 +106,6 @@ function App() {
     } else {
       setFileB(file);
     }
-  };
-
-  // ------------------------------------
-  // Helpers
-  // ------------------------------------
-  const getFailureColor = (
-    rate: number
-  ) => {
-    if (rate === 0) return "#22c55e";
-    if (rate < 0.2) return "#eab308";
-    return "#ef4444";
-  };
-
-  const getStatusMeta = (req: any) => {
-    if (!req)
-      return {
-        label: "—",
-        color: "#64748b",
-      };
-
-    if (req.status === 0)
-      return {
-        label: "Blocked",
-        color: "#f59e0b",
-      };
-
-    if (req.status >= 500)
-      return {
-        label: req.status,
-        color: "#ef4444",
-      };
-
-    if (req.status >= 400)
-      return {
-        label: req.status,
-        color: "#f97316",
-      };
-
-    if (req.status >= 300)
-      return {
-        label: req.status,
-        color: "#eab308",
-      };
-
-    return {
-      label: req.status,
-      color: "#22c55e",
-    };
-  };
-
-  const renderBadge = (req: any) => {
-    const { label, color } =
-      getStatusMeta(req);
-
-    return (
-      <span
-        style={{
-          background: color,
-          color: "white",
-          padding: "4px 10px",
-          borderRadius: "999px",
-          fontSize: "12px",
-          fontWeight: "bold",
-        }}
-      >
-        {label}
-      </span>
-    );
-  };
-
-  const buildDiffRows = (
-    file1: any[],
-    file2: any[]
-  ) => {
-    const max = Math.max(
-      file1.length,
-      file2.length
-    );
-
-    const rows = [];
-
-    for (let i = 0; i < max; i++) {
-      const req1 = file1[i];
-      const req2 = file2[i];
-
-      let result = "Match";
-
-      if (!req1 || !req2) {
-        result = "Missing";
-      } else if (
-        req1.status !== req2.status
-      ) {
-        result = "Mismatch";
-      }
-
-      rows.push({
-        index: i + 1,
-        req1,
-        req2,
-        result,
-      });
-    }
-
-    return rows;
-  };
-
-  const sortBy = (
-    items: any[],
-    asc: boolean,
-    extractor: (item: any) => any
-  ) => {
-    return [...items].sort((a, b) => {
-      const aVal = extractor(a);
-      const bVal = extractor(b);
-
-      if (
-        typeof aVal === "string"
-      ) {
-        return asc
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
-      }
-
-      return asc
-        ? aVal - bVal
-        : bVal - aVal;
-    });
   };
 
   // ------------------------------------
