@@ -1,3 +1,8 @@
+import type {
+  RequestEntry,
+  DiffRow,
+} from "../types";
+
 export const getFailureColor = (
   rate: number
 ) => {
@@ -7,7 +12,7 @@ export const getFailureColor = (
 };
 
 export const getStatusMeta = (
-  req: any
+  req?: RequestEntry
 ) => {
   if (!req) {
     return {
@@ -51,7 +56,7 @@ export const getStatusMeta = (
 };
 
 export const renderBadge = (
-  req: any
+  req?: RequestEntry
 ) => {
   const {
     label,
@@ -77,15 +82,15 @@ export const renderBadge = (
 };
 
 export const buildDiffRows = (
-  file1: any[],
-  file2: any[]
-) => {
+  file1: RequestEntry[],
+  file2: RequestEntry[]
+): DiffRow[] => {
   const max = Math.max(
     file1.length,
     file2.length
   );
 
-  const rows = [];
+  const rows: DiffRow[] = [];
 
   for (let i = 0; i < max; i++) {
     const req1 = file1[i];

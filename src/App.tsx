@@ -9,6 +9,12 @@ import WorstEndpointsTable from "./components/WorstEndpointsTable";
 import MismatchTable from "./components/MismatchTable";
 import EndpointDrawer from "./components/EndpointDrawer";
 
+import type {
+  HarResult,
+  MismatchItem,
+  WorstEndpointItem
+} from "./types";
+
 import {
   getFailureColor,
   renderBadge,
@@ -25,7 +31,7 @@ import {
 function App() {
   const [fileA, setFileA] = useState<File | null>(null);
   const [fileB, setFileB] = useState<File | null>(null);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<HarResult | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,7 +39,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedEndpoint, setSelectedEndpoint] =
-    useState<any>(null);
+    useState<MismatchItem | null>(null);
 
   const [dragTarget, setDragTarget] = useState<
     "file1" | "file2" | null
@@ -84,8 +90,12 @@ function App() {
       }
 
       setResult(data.data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Unkown error");
+      }
     } finally {
       setLoading(false);
     }
@@ -118,7 +128,7 @@ function App() {
   // ------------------------------------
   const filteredWorst = sortBy(
     result?.insights.worstEndpoints.filter(
-      (item: any) =>
+      (item: WorstEndpointItem) =>
         item.url
           .toLowerCase()
           .includes(
@@ -135,7 +145,7 @@ function App() {
   const filteredMismatch =
     sortBy(
       result?.sample.statusMismatches.filter(
-        (item: any) =>
+        (item: MismatchItem) =>
           item.url
             .toLowerCase()
             .includes(
@@ -170,7 +180,7 @@ function App() {
   const failureChartData =
     filteredWorst
       .slice(0, 6)
-      .map((item: any) => ({
+      .map((item: WorstEndpointItem) => ({
         name:
           item.url.length > 20
             ? item.url.slice(
@@ -242,7 +252,7 @@ function App() {
         "Delta",
       ],
       ...filteredMismatch.map(
-        (item: any) => [
+        (item: MismatchItem) => [
           item.url,
           item.file1Requests.length,
           item.file2Requests.length,
