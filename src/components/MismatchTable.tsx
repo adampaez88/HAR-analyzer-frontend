@@ -1,3 +1,5 @@
+import type { MismatchSortField } from "../types";
+
 type MismatchTableProps = {
   filteredMismatch: any[];
   mismatchSortAsc: boolean;
@@ -5,7 +7,7 @@ type MismatchTableProps = {
     React.SetStateAction<boolean>
   >;
   setMismatchSortField: React.Dispatch<
-    React.SetStateAction<string>
+    React.SetStateAction<MismatchSortField>
   >;
   setSelectedEndpoint: React.Dispatch<
     React.SetStateAction<any>

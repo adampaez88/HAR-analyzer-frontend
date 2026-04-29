@@ -1,3 +1,5 @@
+import type { WorstSortField } from "../types";
+
 type WorstEndpointsTableProps = {
   filteredWorst: any[];
   worstSortAsc: boolean;
@@ -5,7 +7,7 @@ type WorstEndpointsTableProps = {
     React.SetStateAction<boolean>
   >;
   setWorstSortField: React.Dispatch<
-    React.SetStateAction<string>
+    React.SetStateAction<WorstSortField>
   >;
   getFailureColor: (
     rate: number
