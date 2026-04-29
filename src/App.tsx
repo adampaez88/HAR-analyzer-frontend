@@ -18,10 +18,13 @@ import type {
 } from "./types";
 
 import {
-  getFailureColor,
   renderBadge,
-  buildDiffRows,
+} from "./utils/uiHelpers";
+
+import { 
   sortBy,
+  getFailureColor,
+  buildDiffRows,
 } from "./utils/helpers";
 
 import {

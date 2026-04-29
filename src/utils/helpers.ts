@@ -3,6 +3,7 @@ import type {
   DiffRow,
 } from "../types";
 
+
 export const getFailureColor = (
   rate: number
 ) => {
@@ -30,55 +31,29 @@ export const getStatusMeta = (
 
   if (req.status >= 500) {
     return {
-      label: req.status,
+      label: String(req.status),
       color: "#ef4444",
     };
   }
 
   if (req.status >= 400) {
     return {
-      label: req.status,
+      label: String(req.status),
       color: "#f97316",
     };
   }
 
   if (req.status >= 300) {
     return {
-      label: req.status,
+      label: String(req.status),
       color: "#eab308",
     };
   }
 
   return {
-    label: req.status,
+    label: String(req.status),
     color: "#22c55e",
   };
-};
-
-export const renderBadge = (
-  req?: RequestEntry
-) => {
-  const {
-    label,
-    color,
-  } = getStatusMeta(req);
-
-  return (
-    <span
-      style={{
-        background: color,
-        color: "white",
-        padding: "4px 10px",
-        borderRadius:
-          "999px",
-        fontSize: "12px",
-        fontWeight:
-          "bold",
-      }}
-    >
-      {label}
-    </span>
-  );
 };
 
 export const buildDiffRows = (
@@ -117,36 +92,32 @@ export const buildDiffRows = (
   return rows;
 };
 
-export const sortBy = (
-  items: any[],
+export const sortBy = <T>(
+  items: T[],
   asc: boolean,
   extractor: (
-    item: any
-  ) => any
-) => {
+    item: T
+  ) => string | number
+): T[] => {
   return [...items].sort(
     (a, b) => {
-      const aVal =
-        extractor(a);
-      const bVal =
-        extractor(b);
+      const aVal = extractor(a);
+      const bVal = extractor(b);
 
       if (
-        typeof aVal ===
-        "string"
+        typeof aVal === "string" &&
+        typeof bVal === "string"
       ) {
         return asc
-          ? aVal.localeCompare(
-              bVal
-            )
-          : bVal.localeCompare(
-              aVal
-            );
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
       }
 
       return asc
-        ? aVal - bVal
-        : bVal - aVal;
+        ? Number(aVal) -
+            Number(bVal)
+        : Number(bVal) -
+            Number(aVal);
     }
   );
 };
