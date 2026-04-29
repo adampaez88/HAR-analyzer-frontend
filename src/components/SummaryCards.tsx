@@ -1,3 +1,7 @@
+import {
+  cardStyle,
+} from "../styles/theme";
+
 type SummaryCardsProps = {
   result: any;
 };
@@ -5,13 +9,6 @@ type SummaryCardsProps = {
 function SummaryCards({
   result,
 }: SummaryCardsProps) {
-  const cardStyle = {
-    background: "#1e293b",
-    padding: "20px",
-    borderRadius: "14px",
-    boxShadow: "0 0 0 1px #334155",
-  };
-
   const cards = [
     {
       label: "File 1 Requests",

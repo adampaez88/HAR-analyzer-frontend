@@ -16,6 +16,11 @@ import {
   sortBy,
 } from "./utils/helpers";
 
+import {
+  tableStyle,
+  thtd,
+} from "./styles/theme";
+
 
 function App() {
   const [fileA, setFileA] = useState<File | null>(null);
@@ -266,26 +271,6 @@ function App() {
     a.click();
 
     URL.revokeObjectURL(url);
-  };
-
-  // ------------------------------------
-  // Styles
-  // ------------------------------------
-  const tableStyle = {
-    width: "100%",
-    borderCollapse:
-      "collapse" as const,
-    background: "#1e293b",
-    borderRadius: "14px",
-    overflow: "hidden",
-  };
-
-  const thtd = {
-    padding: "14px",
-    borderBottom:
-      "1px solid #334155",
-    textAlign:
-      "left" as const,
   };
 
   return (
