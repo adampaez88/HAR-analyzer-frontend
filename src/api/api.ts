@@ -1,5 +1,7 @@
 import type { HarResult } from "../types";
 
+const BASE_URL = "http://localhost:3000";
+
 export const compareHarFiles = async (
   fileA: File,
   fileB: File
@@ -9,7 +11,7 @@ export const compareHarFiles = async (
   formData.append("file2", fileB);
 
   const response = await fetch(
-    "http://localhost:3000/upload",
+    `${BASE_URL}/upload`,
     {
       method: "POST",
       body: formData,
