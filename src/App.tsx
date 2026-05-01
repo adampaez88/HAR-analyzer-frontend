@@ -17,6 +17,8 @@ import type {
   WorstSortField
 } from "./types";
 
+import { compareHarFiles } from "./api/api";
+
 import {
   renderBadge,
 } from "./utils/uiHelpers";
@@ -73,33 +75,18 @@ function App() {
     setError("");
     setResult(null);
 
-    const formData = new FormData();
-    formData.append("file1", fileA);
-    formData.append("file2", fileB);
-
     try {
-      const response = await fetch(
-        "http://localhost:3000/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
+      const data = await compareHarFiles(
+        fileA,
+        fileB
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Upload failed"
-        );
-      }
-
-      setResult(data.data);
+      setResult(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Unkown error");
+        setError("Unknown error");
       }
     } finally {
       setLoading(false);
