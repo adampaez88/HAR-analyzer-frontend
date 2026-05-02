@@ -1,39 +1,31 @@
 import { useState } from "react";
+
 import Sidebar from "./components/Sidebar";
 import UploadSection from "./components/UploadSection";
 import SearchBar from "./components/SearchBar";
 import SummaryCards from "./components/SummaryCards";
 import ExportButtons from "./components/ExportButtons";
-import ChartsSection from "./components/ChartsSection";
-import WorstEndpointsTable from "./components/WorstEndpointsTable";
-import MismatchTable from "./components/MismatchTable";
 import EndpointDrawer from "./components/EndpointDrawer";
+
+// ✅ NEW TABLES
+import MissingRequestsTable from "./components/MissingRequestsTable";
+import ModifiedRequestsTable from "./components/ModifiedRequestsTable";
 
 import type {
   HarResult,
-  MismatchItem,
-  MismatchSortField,
-  WorstEndpointItem,
-  WorstSortField
+  MissingRequest,
+  ModifiedRequest,
 } from "./types";
 
-import { compareHarFiles } from "./api/api";
+import { buildDiffRows } from "./utils/helpers";
 
 import {
-  renderBadge,
-} from "./utils/uiHelpers";
-
-import { 
-  sortBy,
-  getFailureColor,
-  buildDiffRows,
-} from "./utils/helpers";
-
-import {
+  colors,
+  spacing,
+  layout,
   tableStyle,
   thtd,
 } from "./styles/theme";
-
 
 function App() {
   const [fileA, setFileA] = useState<File | null>(null);
@@ -46,21 +38,11 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedEndpoint, setSelectedEndpoint] =
-    useState<MismatchItem | null>(null);
+    useState<ModifiedRequest | null>(null);
 
   const [dragTarget, setDragTarget] = useState<
     "file1" | "file2" | null
   >(null);
-
-  const [worstSortField, setWorstSortField] =
-      useState<WorstSortField>("failure");
-  const [worstSortAsc, setWorstSortAsc] =
-    useState(false);
-
-  const [mismatchSortField, setMismatchSortField] =
-      useState<MismatchSortField>("url");
-  const [mismatchSortAsc, setMismatchSortAsc] =
-    useState(true);
 
   // ------------------------------------
   // Compare HAR Files
@@ -75,19 +57,30 @@ function App() {
     setError("");
     setResult(null);
 
+    const formData = new FormData();
+    formData.append("file1", fileA);
+    formData.append("file2", fileB);
+
     try {
-      const data = await compareHarFiles(
-        fileA,
-        fileB
+      const response = await fetch(
+        "http://localhost:3000/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
       );
 
-      setResult(data);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Unknown error");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Upload failed"
+        );
       }
+
+      setResult(data.data);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -103,9 +96,7 @@ function App() {
     e.preventDefault();
     setDragTarget(null);
 
-    const file =
-      e.dataTransfer.files?.[0];
-
+    const file = e.dataTransfer.files?.[0];
     if (!file) return;
 
     if (target === "file1") {
@@ -115,284 +106,96 @@ function App() {
     }
   };
 
-  // ------------------------------------
-  // Derived Data
-  // ------------------------------------
-  const filteredWorst = sortBy(
-    result?.insights.worstEndpoints.filter(
-      (item: WorstEndpointItem) =>
-        item.url
-          .toLowerCase()
-          .includes(
-            searchTerm.toLowerCase()
-          )
-    ) || [],
-    worstSortAsc,
-    (item) =>
-      worstSortField === "url"
-        ? item.url
-        : item.file1.failureRate
-  );
-
-  const filteredMismatch =
-    sortBy(
-      result?.sample.statusMismatches.filter(
-        (item: MismatchItem) =>
-          item.url
-            .toLowerCase()
-            .includes(
-              searchTerm.toLowerCase()
-            )
-      ) || [],
-      mismatchSortAsc,
-      (item) =>
-        mismatchSortField ===
-        "url"
-          ? item.url
-          : item.file1Requests.length
-    );
-
-  const requestChartData = result
-    ? [
-        {
-          name: "File 1",
-          requests:
-            result.summary
-              .file1TotalRequests,
-        },
-        {
-          name: "File 2",
-          requests:
-            result.summary
-              .file2TotalRequests,
-        },
-      ]
-    : [];
-
-  const failureChartData =
-    filteredWorst
-      .slice(0, 6)
-      .map((item: WorstEndpointItem) => ({
-        name:
-          item.url.length > 20
-            ? item.url.slice(
-                0,
-                20
-              ) + "..."
-            : item.url,
-        rate:
-          item.file1.failureRate,
-      }));
-
-  // ------------------------------------
-  // Export Helpers
-  // ------------------------------------
-  const getDateStamp = () => {
-    return new Date()
-      .toISOString()
-      .split("T")[0];
-  };
-
-  const exportJson = () => {
-    if (!result) return;
-
-    const payload = {
-      summary: result.summary,
-      insights:
-        result.insights,
-      mismatches:
-        result.sample
-          .statusMismatches,
-      exportedAt:
-        new Date().toISOString(),
-    };
-
-    const blob = new Blob(
-      [
-        JSON.stringify(
-          payload,
-          null,
-          2
-        ),
-      ],
-      {
-        type: "application/json",
-      }
-    );
-
-    const url =
-      URL.createObjectURL(blob);
-
-    const a =
-      document.createElement("a");
-
-    a.href = url;
-    a.download = `har-report-${getDateStamp()}.json`;
-    a.click();
-
-    URL.revokeObjectURL(url);
-  };
-
-  const exportCsv = () => {
-    if (!result) return;
-
-    const rows = [
-      [
-        "URL",
-        "File1 Requests",
-        "File2 Requests",
-        "Delta",
-      ],
-      ...filteredMismatch.map(
-        (item: MismatchItem) => [
-          item.url,
-          item.file1Requests.length,
-          item.file2Requests.length,
-          item.file2Requests.length -
-            item.file1Requests.length,
-        ]
-      ),
-    ];
-
-    const csv = rows
-      .map((r) => r.join(","))
-      .join("\n");
-
-    const blob = new Blob([csv], {
-      type: "text/csv",
-    });
-
-    const url =
-      URL.createObjectURL(blob);
-
-    const a =
-      document.createElement("a");
-
-    a.href = url;
-    a.download = `har-report-${getDateStamp()}.csv`;
-    a.click();
-
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div
       style={{
         display: "flex",
         minHeight: "100vh",
-        background: "#0f172a",
-        color: "white",
-        fontFamily:
-          "Arial, sans-serif",
+        background: colors.bg,
+        color: colors.text,
+        fontFamily: "Inter, sans-serif",
       }}
     >
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main */}
       <div
         style={{
           flex: 1,
-          padding: "35px",
+          padding: spacing.pagePadding,
         }}
       >
-        <h1
-          style={{
-            marginTop: 0,
-          }}
-        >
-          HAR File Analyzer
-        </h1>
+        <div style={layout.container}>
+          <h1 style={{ fontSize: "28px", marginBottom: "10px" }}>
+            HAR Analyzer
+          </h1>
 
-        {/* Upload */}
-        <UploadSection
-          fileA={fileA}
-          fileB={fileB}
-          loading={loading}
-          dragTarget={dragTarget}
-          setFileA={setFileA}
-          setFileB={setFileB}
-          setDragTarget={setDragTarget}
-          handleDrop={handleDrop}
-          handleCompare={handleCompare}
-        />
-
-        {error && (
-          <p
-            style={{
-              color:
-                "#ef4444",
-              marginTop:
-                "12px",
-            }}
-          >
-            {error}
+          <p style={{ color: colors.muted }}>
+            Compare and analyze network traffic differences
           </p>
-        )}
 
-        {/* Search */}
-        {result && (
-          <SearchBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
+          <UploadSection
+            fileA={fileA}
+            fileB={fileB}
+            loading={loading}
+            dragTarget={dragTarget}
+            setFileA={setFileA}
+            setFileB={setFileB}
+            setDragTarget={setDragTarget}
+            handleDrop={handleDrop}
+            handleCompare={handleCompare}
           />
-        )}
 
-        {/* Summary */}
-        {result && (
-          <SummaryCards result={result} />
-        )}
+          {error && (
+            <p style={{ color: colors.danger }}>
+              {error}
+            </p>
+          )}
 
-        {/* Export Buttons */}
-        {result && (
-          <ExportButtons
-            exportJson={exportJson}
-            exportCsv={exportCsv}
-          />
-        )}
+          {result && (
+            <SearchBar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+            />
+          )}
 
-        {/* Charts */}
-        {result && (
-          <ChartsSection
-            requestChartData={requestChartData}
-            failureChartData={failureChartData}
-          />
-        )}
+          {result && (
+            <SummaryCards result={result} />
+          )}
 
-        {/* Worst Endpoints */}
-        {result && (
-          <WorstEndpointsTable
-            filteredWorst={filteredWorst}
-            worstSortAsc={worstSortAsc}
-            setWorstSortAsc={setWorstSortAsc}
-            setWorstSortField={setWorstSortField}
-            getFailureColor={getFailureColor}
-          />
-        )}
+          {result && (
+            <ExportButtons
+              exportJson={() => {}}
+              exportCsv={() => {}}
+            />
+          )}
 
-        {/* Mismatch Table */}
-        {result && (
-          <MismatchTable
-            filteredMismatch={filteredMismatch}
-            mismatchSortAsc={mismatchSortAsc}
-            setMismatchSortAsc={setMismatchSortAsc}
-            setMismatchSortField={setMismatchSortField}
-            setSelectedEndpoint={setSelectedEndpoint}
-          />
-        )}
+          {/* ✅ NEW TABLES */}
+          {result && (
+            <MissingRequestsTable
+              data={
+                result.insights.missingRequests as MissingRequest[]
+              }
+            />
+          )}
 
+          {result && (
+            <ModifiedRequestsTable
+              data={
+                result.insights.modifiedRequests as ModifiedRequest[]
+              }
+              setSelectedEndpoint={setSelectedEndpoint}
+            />
+          )}
+        </div>
       </div>
 
-      {/* Drawer */}
       <EndpointDrawer
         selectedEndpoint={selectedEndpoint}
         setSelectedEndpoint={setSelectedEndpoint}
         tableStyle={tableStyle}
         thtd={thtd}
         buildDiffRows={buildDiffRows}
-        renderBadge={renderBadge}
       />
-
     </div>
   );
 }
