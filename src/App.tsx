@@ -1,53 +1,55 @@
 import { useState } from "react";
-
 import Sidebar from "./components/Sidebar";
 import UploadSection from "./components/UploadSection";
 import SearchBar from "./components/SearchBar";
 import SummaryCards from "./components/SummaryCards";
 import ExportButtons from "./components/ExportButtons";
-import EndpointDrawer from "./components/EndpointDrawer";
-
-// ✅ NEW TABLES
 import MissingRequestsTable from "./components/MissingRequestsTable";
 import ModifiedRequestsTable from "./components/ModifiedRequestsTable";
+import EndpointDrawer from "./components/EndpointDrawer";
 
 import type {
   HarResult,
-  MissingRequest,
   ModifiedRequest,
 } from "./types";
 
 import {
-  colors,
-  spacing,
-  layout,
   tableStyle,
   thtd,
 } from "./styles/theme";
 
 function App() {
-  const [fileA, setFileA] = useState<File | null>(null);
-  const [fileB, setFileB] = useState<File | null>(null);
-  const [result, setResult] = useState<HarResult | null>(null);
+  const [fileA, setFileA] =
+    useState<File | null>(null);
+  const [fileB, setFileB] =
+    useState<File | null>(null);
+  const [result, setResult] =
+    useState<HarResult | null>(null);
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading] =
+    useState(false);
+  const [error, setError] =
+    useState("");
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] =
+    useState("");
 
   const [selectedEndpoint, setSelectedEndpoint] =
     useState<ModifiedRequest | null>(null);
 
-  const [dragTarget, setDragTarget] = useState<
-    "file1" | "file2" | null
-  >(null);
+  const [dragTarget, setDragTarget] =
+    useState<"file1" | "file2" | null>(
+      null
+    );
 
-  // ------------------------------------
+  // --------------------
   // Compare HAR Files
-  // ------------------------------------
+  // --------------------
   const handleCompare = async () => {
     if (!fileA || !fileB) {
-      alert("Please upload both HAR files.");
+      alert(
+        "Please upload both HAR files."
+      );
       return;
     }
 
@@ -68,7 +70,8 @@ function App() {
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -84,9 +87,9 @@ function App() {
     }
   };
 
-  // ------------------------------------
+  // --------------------
   // Drag & Drop
-  // ------------------------------------
+  // --------------------
   const handleDrop = (
     e: React.DragEvent<HTMLDivElement>,
     target: "file1" | "file2"
@@ -94,7 +97,9 @@ function App() {
     e.preventDefault();
     setDragTarget(null);
 
-    const file = e.dataTransfer.files?.[0];
+    const file =
+      e.dataTransfer.files?.[0];
+
     if (!file) return;
 
     if (target === "file1") {
@@ -104,92 +109,124 @@ function App() {
     }
   };
 
+  // --------------------
+  // FILTERING (FIXED ✅)
+  // --------------------
+  const filteredMissing =
+    result?.insights.missingRequests.filter(
+      (item) =>
+        (item.key || "")
+          .toLowerCase()
+          .includes(
+            searchTerm.toLowerCase()
+          )
+    ) || [];
+
+  const filteredModified =
+    result?.insights.modifiedRequests.filter(
+      (item) =>
+        (item.key || "")
+          .toLowerCase()
+          .includes(
+            searchTerm.toLowerCase()
+          )
+    ) || [];
+
   return (
     <div
       style={{
         display: "flex",
         minHeight: "100vh",
-        background: colors.bg,
-        color: colors.text,
-        fontFamily: "Inter, sans-serif",
+        background: "#0f172a",
+        color: "white",
+        fontFamily:
+          "Arial, sans-serif",
       }}
     >
+      {/* Sidebar */}
       <Sidebar />
 
+      {/* Main */}
       <div
         style={{
           flex: 1,
-          padding: spacing.pagePadding,
+          padding: "35px",
         }}
       >
-        <div style={layout.container}>
-          <h1 style={{ fontSize: "28px", marginBottom: "10px" }}>
-            HAR Analyzer
-          </h1>
+        <h1 style={{ marginTop: 0 }}>
+          HAR File Analyzer
+        </h1>
 
-          <p style={{ color: colors.muted }}>
-            Compare and analyze network traffic differences
+        {/* Upload */}
+        <UploadSection
+          fileA={fileA}
+          fileB={fileB}
+          loading={loading}
+          dragTarget={dragTarget}
+          setFileA={setFileA}
+          setFileB={setFileB}
+          setDragTarget={setDragTarget}
+          handleDrop={handleDrop}
+          handleCompare={handleCompare}
+        />
+
+        {error && (
+          <p
+            style={{
+              color: "#ef4444",
+              marginTop: "12px",
+            }}
+          >
+            {error}
           </p>
+        )}
 
-          <UploadSection
-            fileA={fileA}
-            fileB={fileB}
-            loading={loading}
-            dragTarget={dragTarget}
-            setFileA={setFileA}
-            setFileB={setFileB}
-            setDragTarget={setDragTarget}
-            handleDrop={handleDrop}
-            handleCompare={handleCompare}
+        {/* Search */}
+        {result && (
+          <SearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
           />
+        )}
 
-          {error && (
-            <p style={{ color: colors.danger }}>
-              {error}
-            </p>
-          )}
+        {/* Summary */}
+        {result && (
+          <SummaryCards result={result} />
+        )}
 
-          {result && (
-            <SearchBar
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-            />
-          )}
+        {/* Export */}
+        {result && (
+          <ExportButtons
+            result={result}
+          />
+        )}
 
-          {result && (
-            <SummaryCards result={result} />
-          )}
+        {/* Missing Requests */}
+        {result && (
+          <MissingRequestsTable
+            data={filteredMissing}
+          />
+        )}
 
-          {result && (
-            <ExportButtons
-              exportJson={() => {}}
-              exportCsv={() => {}}
-            />
-          )}
-
-          {/* ✅ NEW TABLES */}
-          {result && (
-            <MissingRequestsTable
-              data={
-                result.insights.missingRequests as MissingRequest[]
-              }
-            />
-          )}
-
-          {result && (
-            <ModifiedRequestsTable
-              data={
-                result.insights.modifiedRequests as ModifiedRequest[]
-              }
-              setSelectedEndpoint={setSelectedEndpoint}
-            />
-          )}
-        </div>
+        {/* Modified Requests */}
+        {result && (
+          <ModifiedRequestsTable
+            data={filteredModified}
+            setSelectedEndpoint={
+              setSelectedEndpoint
+            }
+          />
+        )}
       </div>
 
+      {/* Drawer */}
       <EndpointDrawer
-        selectedEndpoint={selectedEndpoint}
-        setSelectedEndpoint={setSelectedEndpoint}
+        selectedEndpoint={
+          selectedEndpoint
+        }
+        setSelectedEndpoint={
+          setSelectedEndpoint
+        }
         tableStyle={tableStyle}
         thtd={thtd}
       />
