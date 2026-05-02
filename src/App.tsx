@@ -17,8 +17,6 @@ import type {
   ModifiedRequest,
 } from "./types";
 
-import { buildDiffRows } from "./utils/helpers";
-
 import {
   colors,
   spacing,
@@ -194,7 +192,6 @@ function App() {
         setSelectedEndpoint={setSelectedEndpoint}
         tableStyle={tableStyle}
         thtd={thtd}
-        buildDiffRows={buildDiffRows}
       />
     </div>
   );
