@@ -1,46 +1,86 @@
-export interface RequestEntry {
+export interface HarEntry {
+  request?: {
+    url?: string;
+    method?: string;
+    headers?: { name: string; value: string }[];
+    postData?: {
+      text?: string;
+    };
+  };
+  response?: {
+    status?: number;
+    startedDateTime?: string;
+    headers?: { name: string; value: string }[];
+  };
+}
+
+export interface HarFile {
+  log?: {
+    entries?: HarEntry[];
+  };
+}
+
+export interface DetailedRequest {
+  method: string;
+  baseUrl: string;
+  queryParams: Record<string, string>;
+  headers: Record<string, string>;
+  body: string | undefined;
   status: number;
+  time: string;
 }
 
-export interface WorstEndpointItem {
-  url: string;
-  file1: {
-    failureRate: number;
+// -------------------- NEW BACKEND TYPES --------------------
+
+export interface MissingRequest {
+  key: string;
+  file1Count: number;
+  file2Count: number;
+  difference: number;
+}
+
+export interface DetailedDiff {
+  key: string;
+
+  request: {
+    headers: any;
+    body: any;
   };
-  file2?: {
-    failureRate: number;
+
+  response: {
+    headers: any;
   };
 }
 
-export interface MismatchItem {
-  url: string;
-  file1Requests: RequestEntry[];
-  file2Requests: RequestEntry[];
-}
-
-export interface SummaryData {
-  file1TotalRequests: number;
-  file2TotalRequests: number;
-  statusMismatches: number;
-  uniqueUrlsFile1: number;
+export interface ModifiedRequest {
+  key: string;
+  file1: DetailedRequest;
+  file2: DetailedRequest;
+  diff: DetailedDiff;
 }
 
 export interface HarResult {
-  summary: SummaryData;
+  message: string;
+
+  summary: {
+    file1TotalRequests: number;
+    file2TotalRequests: number;
+    missingRequestGroups: number;
+    modifiedRequestPairs: number;
+  };
+
   insights: {
-    worstEndpoints: WorstEndpointItem[];
+    missingRequests: MissingRequest[];
+    modifiedRequests: ModifiedRequest[];
   };
+
+  aiReadySummary: {
+    totalDifferences: number;
+    biggestChangeArea: string;
+  };
+
   sample: {
-    statusMismatches: MismatchItem[];
+    missingRequests: MissingRequest[];
+    modifiedRequests: ModifiedRequest[];
   };
 }
-
-export interface DiffRow {
-  index: number;
-  req1?: RequestEntry;
-  req2?: RequestEntry;
-  result: string;
-}
-
-export type WorstSortField = "url" | "failure";
-export type MismatchSortField = "url" | "count";
