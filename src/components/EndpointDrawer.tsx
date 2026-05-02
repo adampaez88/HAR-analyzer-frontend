@@ -3,7 +3,6 @@ type EndpointDrawerProps = {
   setSelectedEndpoint: React.Dispatch<React.SetStateAction<any>>;
   tableStyle: any;
   thtd: any;
-  buildDiffRows: (file1: any[], file2: any[]) => any[];
 };
 
 function EndpointDrawer({
@@ -11,9 +10,11 @@ function EndpointDrawer({
   setSelectedEndpoint,
   tableStyle,
   thtd,
-  buildDiffRows,
 }: EndpointDrawerProps) {
   if (!selectedEndpoint) return null;
+
+  const isModified =
+    selectedEndpoint.file1 && selectedEndpoint.file2;
 
   return (
     <>
@@ -66,14 +67,14 @@ function EndpointDrawer({
           </button>
         </div>
 
-        {/* Key / URL */}
+        {/* Key */}
         <p
           style={{
             color: "#94a3b8",
             wordBreak: "break-word",
           }}
         >
-          {selectedEndpoint.key || selectedEndpoint.url}
+          {selectedEndpoint.key}
         </p>
 
         <hr
@@ -83,68 +84,113 @@ function EndpointDrawer({
           }}
         />
 
-        {/* Counts */}
-        <p>
-          File 1 Requests:{" "}
-          {selectedEndpoint.file1Requests?.length ?? 0}
-        </p>
+        {/* ========================= */}
+        {/* MODIFIED REQUEST VIEW */}
+        {/* ========================= */}
+        {isModified && (
+          <>
+            <h3>Request Comparison</h3>
 
-        <p>
-          File 2 Requests:{" "}
-          {selectedEndpoint.file2Requests?.length ?? 0}
-        </p>
+            <table style={tableStyle}>
+              <thead>
+                <tr>
+                  <th style={thtd}>Field</th>
+                  <th style={thtd}>File 1</th>
+                  <th style={thtd}>File 2</th>
+                </tr>
+              </thead>
 
-        {/* Comparison Table */}
-        <h3 style={{ marginTop: "25px" }}>
-          Request Comparison
-        </h3>
+              <tbody>
+                <tr>
+                  <td style={thtd}>Method</td>
+                  <td style={thtd}>
+                    {selectedEndpoint.file1.method}
+                  </td>
+                  <td style={thtd}>
+                    {selectedEndpoint.file2.method}
+                  </td>
+                </tr>
 
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={thtd}>#</th>
-              <th style={thtd}>File1</th>
-              <th style={thtd}>File2</th>
-              <th style={thtd}>Result</th>
-            </tr>
-          </thead>
+                <tr>
+                  <td style={thtd}>Status</td>
+                  <td style={thtd}>
+                    {selectedEndpoint.file1.status}
+                  </td>
+                  <td style={thtd}>
+                    {selectedEndpoint.file2.status}
+                  </td>
+                </tr>
 
-          <tbody>
-            {buildDiffRows(
-              selectedEndpoint.file1Requests || [],
-              selectedEndpoint.file2Requests || []
-            ).map((row: any) => (
-              <tr key={row.index}>
-                <td style={thtd}>{row.index}</td>
+                <tr>
+                  <td style={thtd}>Base URL</td>
+                  <td style={thtd}>
+                    {selectedEndpoint.file1.baseUrl}
+                  </td>
+                  <td style={thtd}>
+                    {selectedEndpoint.file2.baseUrl}
+                  </td>
+                </tr>
 
-                {/* File1 */}
-                <td style={thtd}>
-                  {row.req1 ? "Present" : "Missing"}
-                </td>
+                <tr>
+                  <td style={thtd}>Time</td>
+                  <td style={thtd}>
+                    {selectedEndpoint.file1.time}
+                  </td>
+                  <td style={thtd}>
+                    {selectedEndpoint.file2.time}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </>
+        )}
 
-                {/* File2 */}
-                <td style={thtd}>
-                  {row.req2 ? "Present" : "Missing"}
-                </td>
+        {/* ========================= */}
+        {/* DIFF PREVIEW (NEW 🔥) */}
+        {/* ========================= */}
+        {selectedEndpoint.diff && (
+          <>
+            <h3 style={{ marginTop: "25px" }}>
+              Header Differences
+            </h3>
 
-                {/* Result */}
-                <td
-                  style={{
-                    ...thtd,
-                    color:
-                      row.result === "Mismatch"
-                        ? "#ef4444"
-                        : row.result === "Missing"
-                        ? "#f59e0b"
-                        : "#22c55e",
-                  }}
-                >
-                  {row.result}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            <pre
+              style={{
+                background: "#0f172a",
+                padding: "12px",
+                borderRadius: "8px",
+                overflowX: "auto",
+                fontSize: "12px",
+              }}
+            >
+              {JSON.stringify(
+                selectedEndpoint.diff.request.headers,
+                null,
+                2
+              )}
+            </pre>
+
+            <h3 style={{ marginTop: "20px" }}>
+              Body Differences
+            </h3>
+
+            <pre
+              style={{
+                background: "#0f172a",
+                padding: "12px",
+                borderRadius: "8px",
+                overflowX: "auto",
+                fontSize: "12px",
+              }}
+            >
+              {JSON.stringify(
+                selectedEndpoint.diff.request.body,
+                null,
+                2
+              )}
+            </pre>
+          </>
+        )}
       </div>
     </>
   );
