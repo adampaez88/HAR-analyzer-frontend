@@ -1,35 +1,33 @@
-import type { MissingRequest } from "../types";
+type Props = {
+  data: any[];
+};
 
-export default function MissingRequestsTable({
-  data,
-}: {
-  data: MissingRequest[];
-}) {
+function MissingRequestsTable({ data }: Props) {
   return (
-    <div>
+    <div style={{ marginTop: 30 }}>
       <h2>Missing Requests</h2>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Key</th>
-            <th>File1</th>
-            <th>File2</th>
-            <th>Diff</th>
-          </tr>
-        </thead>
+      <div style={{ display: "grid", gap: 12 }}>
+        {data.map((item, i) => (
+          <div
+            key={i}
+            style={{
+              background: "#1e293b",
+              padding: 15,
+              borderRadius: 10,
+              border: "1px solid #334155"
+            }}
+          >
+            <strong>{item.key}</strong>
 
-        <tbody>
-          {data.map((r) => (
-            <tr key={r.key}>
-              <td>{r.key}</td>
-              <td>{r.file1Count}</td>
-              <td>{r.file2Count}</td>
-              <td>{r.difference}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            <p>File1: {item.file1Count}</p>
+            <p>File2: {item.file2Count}</p>
+            <p>Difference: {item.difference}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
+
+export default MissingRequestsTable;

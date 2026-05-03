@@ -13,11 +13,6 @@ import type {
   ModifiedRequest,
 } from "./types";
 
-import {
-  tableStyle,
-  thtd,
-} from "./styles/theme";
-
 function App() {
   const [fileA, setFileA] =
     useState<File | null>(null);
@@ -227,8 +222,6 @@ function App() {
         setSelectedEndpoint={
           setSelectedEndpoint
         }
-        tableStyle={tableStyle}
-        thtd={thtd}
       />
     </div>
   );
