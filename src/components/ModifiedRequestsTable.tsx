@@ -1,64 +1,34 @@
-import type { ModifiedRequest } from "../types";
-
 type Props = {
-  data: ModifiedRequest[];
-  setSelectedEndpoint: React.Dispatch<
-    React.SetStateAction<ModifiedRequest | null>
-  >;
+  data: any[];
+  setSelectedEndpoint: any;
 };
 
-function ModifiedRequestsTable({
-  data,
-  setSelectedEndpoint,
-}: Props) {
+function ModifiedRequestsTable({ data, setSelectedEndpoint }: Props) {
   return (
-    <div style={{ marginTop: "30px" }}>
+    <div style={{ marginTop: 30 }}>
       <h2>Modified Requests</h2>
 
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-        }}
-      >
-        <thead>
-          <tr>
-            <th style={{ padding: "12px", textAlign: "left" }}>
-              Endpoint
-            </th>
-            <th style={{ padding: "12px", textAlign: "left" }}>
-              Method
-            </th>
-            <th style={{ padding: "12px", textAlign: "left" }}>
-              Status Change
-            </th>
-          </tr>
-        </thead>
+      <div style={{ display: "grid", gap: 12 }}>
+        {data.map((item, i) => (
+          <div
+            key={i}
+            onClick={() => setSelectedEndpoint(item)}
+            style={{
+              background: "#1e293b",
+              padding: 15,
+              borderRadius: 10,
+              cursor: "pointer",
+              border: "1px solid #334155"
+            }}
+          >
+            <strong>{item.key}</strong>
 
-        <tbody>
-          {data.map((item, i) => (
-            <tr
-              key={i}
-              onClick={() => setSelectedEndpoint(item)}
-              style={{
-                cursor: "pointer",
-              }}
-            >
-              <td style={{ padding: "12px" }}>
-                {item.key}
-              </td>
-
-              <td style={{ padding: "12px" }}>
-                {item.file1.method}
-              </td>
-
-              <td style={{ padding: "12px" }}>
-                {item.file1.status} → {item.file2.status}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            <p style={{ color: "#94a3b8" }}>
+              Click to inspect differences
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
