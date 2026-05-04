@@ -1,9 +1,14 @@
+import type { NormalizedModifiedRequest } from "../adapters/diffAdapter";
+
 type Props = {
-  data: any[];
-  setSelectedEndpoint: any;
+  data: NormalizedModifiedRequest[];
+  setSelectedEndpoint: (item: NormalizedModifiedRequest) => void;
 };
 
-function ModifiedRequestsTable({ data, setSelectedEndpoint }: Props) {
+function ModifiedRequestsTable({
+  data,
+  setSelectedEndpoint,
+}: Props) {
   return (
     <div style={{ marginTop: 30 }}>
       <h2>Modified Requests</h2>
@@ -18,7 +23,7 @@ function ModifiedRequestsTable({ data, setSelectedEndpoint }: Props) {
               padding: 15,
               borderRadius: 10,
               cursor: "pointer",
-              border: "1px solid #334155"
+              border: "1px solid #334155",
             }}
           >
             <strong>{item.key}</strong>
