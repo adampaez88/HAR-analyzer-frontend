@@ -1,79 +1,98 @@
 import { useState } from "react";
 import JsonViewer from "./JsonViewer";
 
-type RawDiff = {
-  added?: any[];
-  removed?: any[];
-  changed?: any[];
+type DiffSection = {
+  added: any[];
+  removed: any[];
+  changed: {
+    key: string;
+    from: any;
+    to: any;
+  }[];
 };
 
 type Props = {
-  diff: any;
+  diff: {
+    headers: DiffSection;
+    body: DiffSection;
+    responseHeaders: DiffSection;
+  };
 };
 
-function normalizeSection(raw: RawDiff) {
-  const result: any[] = [];
+type Row = {
+  key: string;
+  type: "added" | "removed" | "changed";
+  before?: any;
+  after?: any;
+};
 
-  raw.changed?.forEach((item) => {
-    result.push({
-      key: item.key,
+function normalize(section: DiffSection): Row[] {
+  const rows: Row[] = [];
+
+  section.changed.forEach((c) => {
+    rows.push({
+      key: c.key,
       type: "changed",
-      before: item.from,
-      after: item.to,
+      before: c.from,
+      after: c.to,
     });
   });
 
-  raw.added?.forEach((item) => {
-    result.push({
-      key: item.key,
+  section.added.forEach((a) => {
+    rows.push({
+      key: a.key ?? "added",
       type: "added",
-      before: undefined,
-      after: item.value,
+      after: a,
     });
   });
 
-  raw.removed?.forEach((item) => {
-    result.push({
-      key: item.key,
+  section.removed.forEach((r) => {
+    rows.push({
+      key: r.key ?? "removed",
       type: "removed",
-      before: item.value,
-      after: undefined,
+      before: r,
     });
   });
 
-  return result;
+  return rows;
+}
+
+function getColor(type: string) {
+  switch (type) {
+    case "added":
+      return "#22c55e";
+    case "removed":
+      return "#ef4444";
+    case "changed":
+      return "#facc15";
+    default:
+      return "#e2e8f0";
+  }
 }
 
 function DiffViewer({ diff }: Props) {
   const [showOnlyDiffs, setShowOnlyDiffs] = useState(true);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
-  if (!diff) return null;
+  const toggle = (key: string) =>
+    setCollapsed((p) => ({ ...p, [key]: !p[key] }));
 
-  const toggleSection = (section: string) => {
-    setCollapsed((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  const renderSection = (title: string, raw: RawDiff) => {
-    const data = normalizeSection(raw);
-
-    if (!data.length) return null;
+  const renderSection = (title: string, section: DiffSection) => {
+    const rows = normalize(section);
 
     const isCollapsed = collapsed[title];
+    const hasData = rows.length > 0;
 
     return (
-      <div style={{ marginBottom: "25px" }}>
-        {/* Header */}
+      <div style={{ marginBottom: 20 }}>
+        {/* SECTION HEADER */}
         <div
-          onClick={() => toggleSection(title)}
+          onClick={() => toggle(title)}
           style={{
-            cursor: "pointer",
             background: "#1e293b",
             padding: "10px",
-            borderRadius: "8px",
+            borderRadius: 8,
+            cursor: "pointer",
             border: "1px solid #334155",
             display: "flex",
             justifyContent: "space-between",
@@ -83,60 +102,55 @@ function DiffViewer({ diff }: Props) {
           <span>{isCollapsed ? "▶" : "▼"}</span>
         </div>
 
+        {/* SECTION CONTENT */}
         {!isCollapsed && (
-          <table
-            style={{
-              width: "100%",
-              marginTop: "10px",
-              borderCollapse: "collapse",
-              fontSize: "13px",
-            }}
-          >
-            <thead>
-              <tr>
-                <th style={{ textAlign: "left" }}>Field</th>
-                <th style={{ textAlign: "left" }}>Before</th>
-                <th style={{ textAlign: "left" }}>After</th>
-                <th style={{ textAlign: "left" }}>Action</th>
-              </tr>
-            </thead>
+          <div style={{ marginTop: 10 }}>
+            {!hasData && (
+              <div style={{ color: "#64748b" }}>
+                No differences detected
+              </div>
+            )}
 
-            <tbody>
-              {data.map((item, i) => {
-                if (
-                  showOnlyDiffs &&
-                  item.type === undefined
-                ) {
-                  return null;
-                }
-
-                let color = "#e2e8f0";
-                if (item.type === "changed") color = "#facc15";
-                if (item.type === "added") color = "#22c55e";
-                if (item.type === "removed") color = "#ef4444";
-
-                return (
-                  <tr key={i}>
-                    <td style={{ padding: "6px", color }}>
-                      {item.key}
-                    </td>
-
-                    <td style={{ padding: "6px" }}>
-                      <JsonViewer data={item.before} />
-                    </td>
-
-                    <td style={{ padding: "6px" }}>
-                      <JsonViewer data={item.after} />
-                    </td>
-
-                    <td style={{ padding: "6px", color }}>
-                      {item.type}
-                    </td>
+            {hasData && (
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: 13,
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "left" }}>Key</th>
+                    <th style={{ textAlign: "left" }}>Before</th>
+                    <th style={{ textAlign: "left" }}>After</th>
+                    <th style={{ textAlign: "left" }}>Type</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+
+                <tbody>
+                  {rows.map((r, i) => {
+                    if (showOnlyDiffs && r.type === undefined) return null;
+
+                    const color = getColor(r.type);
+
+                    return (
+                      <tr key={i}>
+                        <td style={{ color }}>{r.key}</td>
+                        <td>
+                          <JsonViewer data={r.before} />
+                        </td>
+                        <td>
+                          <JsonViewer data={r.after} />
+                        </td>
+                        <td style={{ color }}>{r.type}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
         )}
       </div>
     );
@@ -144,22 +158,22 @@ function DiffViewer({ diff }: Props) {
 
   return (
     <div>
-      {/* Controls */}
-      <div style={{ marginBottom: "15px" }}>
-        <label style={{ cursor: "pointer" }}>
+      {/* CONTROLS */}
+      <div style={{ marginBottom: 15 }}>
+        <label>
           <input
             type="checkbox"
             checked={showOnlyDiffs}
-            onChange={() =>
-              setShowOnlyDiffs(!showOnlyDiffs)
-            }
+            onChange={() => setShowOnlyDiffs(!showOnlyDiffs)}
           />{" "}
           Show only differences
         </label>
       </div>
 
-      {renderSection("Headers", diff.request?.headers)}
-      {renderSection("Body", diff.request?.body)}
+      {/* SECTIONS */}
+      {renderSection("Headers", diff.headers)}
+      {renderSection("Body", diff.body)}
+      {renderSection("Response Headers", diff.responseHeaders)}
     </div>
   );
 }
