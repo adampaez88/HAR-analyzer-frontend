@@ -8,43 +8,34 @@ import MissingRequestsTable from "./components/MissingRequestsTable";
 import ModifiedRequestsTable from "./components/ModifiedRequestsTable";
 import EndpointDrawer from "./components/EndpointDrawer";
 
-import type {
-  HarResult,
-  ModifiedRequest,
-} from "./types";
+import {
+  adaptModifiedRequests,
+} from "./adapters/diffAdapter";
+
+import type { NormalizedModifiedRequest } from "./adapters/diffAdapter";
 
 function App() {
-  const [fileA, setFileA] =
-    useState<File | null>(null);
-  const [fileB, setFileB] =
-    useState<File | null>(null);
-  const [result, setResult] =
-    useState<HarResult | null>(null);
+  const [fileA, setFileA] = useState<File | null>(null);
+  const [fileB, setFileB] = useState<File | null>(null);
 
-  const [loading, setLoading] =
-    useState(false);
-  const [error, setError] =
-    useState("");
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [searchTerm, setSearchTerm] =
-    useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedEndpoint, setSelectedEndpoint] =
-    useState<ModifiedRequest | null>(null);
+    useState<NormalizedModifiedRequest | null>(null);
 
   const [dragTarget, setDragTarget] =
-    useState<"file1" | "file2" | null>(
-      null
-    );
+    useState<"file1" | "file2" | null>(null);
 
   // --------------------
   // Compare HAR Files
   // --------------------
   const handleCompare = async () => {
     if (!fileA || !fileB) {
-      alert(
-        "Please upload both HAR files."
-      );
+      alert("Please upload both HAR files.");
       return;
     }
 
@@ -57,24 +48,29 @@ function App() {
     formData.append("file2", fileB);
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch("http://localhost:3000/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error || "Upload failed"
-        );
+        throw new Error(data.error || "Upload failed");
       }
 
-      setResult(data.data);
+      // ✅ NORMALIZE MODIFIED REQUESTS HERE
+      const normalizedModified = adaptModifiedRequests(
+        data.data.insights.modifiedRequests
+      );
+
+      setResult({
+        ...data.data,
+        insights: {
+          ...data.data.insights,
+          modifiedRequests: normalizedModified,
+        },
+      });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -92,39 +88,24 @@ function App() {
     e.preventDefault();
     setDragTarget(null);
 
-    const file =
-      e.dataTransfer.files?.[0];
-
+    const file = e.dataTransfer.files?.[0];
     if (!file) return;
 
-    if (target === "file1") {
-      setFileA(file);
-    } else {
-      setFileB(file);
-    }
+    if (target === "file1") setFileA(file);
+    else setFileB(file);
   };
 
   // --------------------
-  // FILTERING (FIXED ✅)
+  // FILTERING
   // --------------------
   const filteredMissing =
-    result?.insights.missingRequests.filter(
-      (item) =>
-        (item.key || "")
-          .toLowerCase()
-          .includes(
-            searchTerm.toLowerCase()
-          )
+    result?.insights.missingRequests.filter((item: any) =>
+      (item.key || "").toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
 
   const filteredModified =
-    result?.insights.modifiedRequests.filter(
-      (item) =>
-        (item.key || "")
-          .toLowerCase()
-          .includes(
-            searchTerm.toLowerCase()
-          )
+    result?.insights.modifiedRequests.filter((item: any) =>
+      (item.key || "").toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
 
   return (
@@ -134,25 +115,14 @@ function App() {
         minHeight: "100vh",
         background: "#0f172a",
         color: "white",
-        fontFamily:
-          "Arial, sans-serif",
+        fontFamily: "Arial, sans-serif",
       }}
     >
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main */}
-      <div
-        style={{
-          flex: 1,
-          padding: "35px",
-        }}
-      >
-        <h1 style={{ marginTop: 0 }}>
-          HAR File Analyzer
-        </h1>
+      <div style={{ flex: 1, padding: "35px" }}>
+        <h1>HAR File Analyzer</h1>
 
-        {/* Upload */}
         <UploadSection
           fileA={fileA}
           fileB={fileB}
@@ -165,63 +135,30 @@ function App() {
           handleCompare={handleCompare}
         />
 
-        {error && (
-          <p
-            style={{
-              color: "#ef4444",
-              marginTop: "12px",
-            }}
-          >
-            {error}
-          </p>
-        )}
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
-        {/* Search */}
         {result && (
-          <SearchBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-          />
+          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         )}
 
-        {/* Summary */}
+        {result && <SummaryCards result={result} />}
+        {result && <ExportButtons result={result} />}
+
         {result && (
-          <SummaryCards result={result} />
+          <MissingRequestsTable data={filteredMissing} />
         )}
 
-        {/* Export */}
-        {result && (
-          <ExportButtons
-            result={result}
-          />
-        )}
-
-        {/* Missing Requests */}
-        {result && (
-          <MissingRequestsTable
-            data={filteredMissing}
-          />
-        )}
-
-        {/* Modified Requests */}
         {result && (
           <ModifiedRequestsTable
             data={filteredModified}
-            setSelectedEndpoint={
-              setSelectedEndpoint
-            }
+            setSelectedEndpoint={setSelectedEndpoint}
           />
         )}
       </div>
 
-      {/* Drawer */}
       <EndpointDrawer
-        selectedEndpoint={
-          selectedEndpoint
-        }
-        setSelectedEndpoint={
-          setSelectedEndpoint
-        }
+        selectedEndpoint={selectedEndpoint}
+        setSelectedEndpoint={setSelectedEndpoint}
       />
     </div>
   );
