@@ -8,7 +8,10 @@ type Props = {
   diff: {
     headers: DiffSection;
     body: DiffSection;
+    cookies: DiffSection;
+
     responseHeaders: DiffSection;
+    responseCookies: DiffSection;
   };
 };
 
@@ -23,18 +26,31 @@ function count(section: DiffSection) {
 function RequestChangeSummary({ diff }: Props) {
   const headers = count(diff.headers);
   const body = count(diff.body);
-  const response = count(diff.responseHeaders);
+  const cookies = count(diff.cookies);
+
+  const responseHeaders = count(diff.responseHeaders);
+  const responseCookies = count(diff.responseCookies);
 
   const total =
     headers.added +
     headers.removed +
     headers.changed +
+
     body.added +
     body.removed +
     body.changed +
-    response.added +
-    response.removed +
-    response.changed;
+
+    cookies.added +
+    cookies.removed +
+    cookies.changed +
+
+    responseHeaders.added +
+    responseHeaders.removed +
+    responseHeaders.changed +
+
+    responseCookies.added +
+    responseCookies.removed +
+    responseCookies.changed;
 
   return (
     <div
@@ -46,7 +62,9 @@ function RequestChangeSummary({ diff }: Props) {
         borderRadius: 10,
       }}
     >
-      <h3 style={{ marginTop: 0 }}>Change Summary</h3>
+      <h3 style={{ marginTop: 0 }}>
+        Change Summary
+      </h3>
 
       {total === 0 ? (
         <p style={{ color: "#64748b" }}>
@@ -54,41 +72,98 @@ function RequestChangeSummary({ diff }: Props) {
         </p>
       ) : (
         <ul style={{ color: "#e2e8f0" }}>
+          {/* HEADERS */}
           {headers.changed > 0 && (
             <li>
               {headers.changed} header change(s)
             </li>
           )}
+
           {headers.added > 0 && (
             <li>
               {headers.added} header(s) added
             </li>
           )}
+
           {headers.removed > 0 && (
             <li>
               {headers.removed} header(s) removed
             </li>
           )}
 
+          {/* COOKIES */}
+          {cookies.changed > 0 && (
+            <li>
+              {cookies.changed} cookie change(s)
+            </li>
+          )}
+
+          {cookies.added > 0 && (
+            <li>
+              {cookies.added} cookie(s) added
+            </li>
+          )}
+
+          {cookies.removed > 0 && (
+            <li>
+              {cookies.removed} cookie(s) removed
+            </li>
+          )}
+
+          {/* BODY */}
           {body.changed > 0 && (
             <li>
               {body.changed} body field change(s)
             </li>
           )}
+
           {body.added > 0 && (
             <li>
               {body.added} body field(s) added
             </li>
           )}
+
           {body.removed > 0 && (
             <li>
               {body.removed} body field(s) removed
             </li>
           )}
 
-          {response.changed > 0 && (
+          {/* RESPONSE HEADERS */}
+          {responseHeaders.changed > 0 && (
             <li>
-              {response.changed} response header change(s)
+              {responseHeaders.changed} response header change(s)
+            </li>
+          )}
+
+          {responseHeaders.added > 0 && (
+            <li>
+              {responseHeaders.added} response header(s) added
+            </li>
+          )}
+
+          {responseHeaders.removed > 0 && (
+            <li>
+              {responseHeaders.removed} response header(s) removed
+            </li>
+          )}
+
+          {/* RESPONSE COOKIES */}
+          {responseCookies.changed > 0 && (
+            <li>
+              {responseCookies.changed} response cookie change(s)
+            </li>
+          )}
+
+          {responseCookies.added > 0 && (
+            <li>
+              {responseCookies.added} response cookie(s) added
+            </li>
+          )}
+
+          {responseCookies.removed > 0 && (
+            <li>
+              {responseCookies.removed} response cookie(s) removed
             </li>
           )}
         </ul>
