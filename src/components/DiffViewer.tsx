@@ -15,7 +15,9 @@ type Props = {
   diff: {
     headers: DiffSection;
     body: DiffSection;
+    cookies: DiffSection;
     responseHeaders: DiffSection;
+    responseCookies: DiffSection;
   };
 };
 
@@ -172,8 +174,11 @@ function DiffViewer({ diff }: Props) {
 
       {/* SECTIONS */}
       {renderSection("Headers", diff.headers)}
+      {renderSection("Cookies", diff.cookies)}
       {renderSection("Body", diff.body)}
+
       {renderSection("Response Headers", diff.responseHeaders)}
+      {renderSection("Response Cookies", diff.responseCookies)}
     </div>
   );
 }

@@ -1,91 +1,78 @@
-// src/adapters/diffAdapter.ts
-
-import type { ModifiedRequest } from "../types";
-
-/**
- * UI-safe normalized diff section
- */
-export type NormalizedDiffSection = {
-  added: any[];
-  removed: any[];
-  changed: {
-    key: string;
-    from: any;
-    to: any;
-  }[];
+export type DiffItem = {
+  key: string;
+  value?: any;
+  from?: any;
+  to?: any;
 };
 
-/**
- * Fully normalized request diff for UI
- */
-export type NormalizedRequestDiff = {
-  headers: NormalizedDiffSection;
-  body: NormalizedDiffSection;
-  responseHeaders: NormalizedDiffSection;
+export type DiffSection = {
+  added: DiffItem[];
+  removed: DiffItem[];
+  changed: DiffItem[];
 };
 
-/**
- * Final UI model
- */
 export type NormalizedModifiedRequest = {
   key: string;
+
   file1: any;
   file2: any;
-  diff: NormalizedRequestDiff;
+
+  timing?: {
+    file1: number;
+    file2: number;
+    delta: number;
+  };
+
+  diff: {
+    headers: DiffSection;
+    body: DiffSection;
+    cookies: DiffSection;
+
+    responseHeaders: DiffSection;
+    responseCookies: DiffSection;
+  };
 };
 
-/**
- * Safe fallback
- */
-const emptySection = (): NormalizedDiffSection => ({
-  added: [],
-  removed: [],
-  changed: [],
-});
-
-/**
- * Normalize backend DiffResult → UI-safe section
- */
-function normalizeSection(section: any): NormalizedDiffSection {
-  if (!section) return emptySection();
-
+function empty(): DiffSection {
   return {
-    added: section.added ?? [],
-    removed: section.removed ?? [],
-    changed:
-      section.changed?.map((c: any) => ({
-        key: c.key,
-        from: c.from,
-        to: c.to,
-      })) ?? [],
+    added: [],
+    removed: [],
+    changed: [],
   };
 }
 
-/**
- * Convert backend ModifiedRequest → UI-safe structure
- */
 export function adaptModifiedRequest(
-  request: ModifiedRequest
+  raw: any
 ): NormalizedModifiedRequest {
   return {
-    key: request.key,
-    file1: request.file1,
-    file2: request.file2,
+    key: raw.key,
+
+    file1: raw.file1,
+    file2: raw.file2,
+
+    timing: raw.timing,
+
     diff: {
-      headers: normalizeSection(request.diff?.request?.headers),
-      body: normalizeSection(request.diff?.request?.body),
-      responseHeaders: normalizeSection(
-        request.diff?.response?.headers
-      ),
+      headers:
+        raw.diff?.request?.headers || empty(),
+
+      body:
+        raw.diff?.request?.body || empty(),
+
+      cookies:
+        raw.diff?.request?.cookies || empty(),
+
+      responseHeaders:
+        raw.diff?.response?.headers || empty(),
+
+      responseCookies:
+        raw.diff?.response?.cookies || empty(),
     },
   };
 }
 
-/**
- * Batch adapter
- */
 export function adaptModifiedRequests(
-  requests: ModifiedRequest[]
+  requests: any[]
 ): NormalizedModifiedRequest[] {
   return requests.map(adaptModifiedRequest);
 }
