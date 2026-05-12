@@ -13,6 +13,7 @@ import {
 } from "./adapters/diffAdapter";
 
 import type { NormalizedModifiedRequest } from "./adapters/diffAdapter";
+import { compareHarFiles } from "./api/api";
 
 function App() {
   const [fileA, setFileA] = useState<File | null>(null);
@@ -43,36 +44,24 @@ function App() {
     setError("");
     setResult(null);
 
-    const formData = new FormData();
-    formData.append("file1", fileA);
-    formData.append("file2", fileB);
-
     try {
-      const response = await fetch("http://localhost:3000/upload", {
-        method: "POST",
-        body: formData,
-      });
+      // ✅ CLEAN ARCHITECTURE: API LAYER HANDLES REQUEST
+      const data = await compareHarFiles(fileA, fileB);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Upload failed");
-      }
-
-      // ✅ NORMALIZE MODIFIED REQUESTS HERE
+      // Normalize modified requests for UI layer
       const normalizedModified = adaptModifiedRequests(
-        data.data.insights.modifiedRequests
+        data.insights.modifiedRequests
       );
 
       setResult({
-        ...data.data,
+        ...data,
         insights: {
-          ...data.data.insights,
+          ...data.insights,
           modifiedRequests: normalizedModified,
         },
       });
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
