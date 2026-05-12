@@ -3,6 +3,11 @@ import type { HarResult } from "../types";
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL;
 
+console.log(
+  "VITE_API_BASE_URL:",
+  BASE_URL
+);
+
 export const compareHarFiles = async (
   fileA: File,
   fileB: File
