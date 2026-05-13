@@ -8,11 +8,6 @@ console.log(
   BASE_URL
 );
 
-console.log(
-  "VITE_API_BASE_URL:",
-  BASE_URL
-);
-
 export const compareHarFiles = async (
   fileA: File,
   fileB: File
