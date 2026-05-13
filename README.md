@@ -1,62 +1,32 @@
 # HAR Analyzer Frontend
-
 Frontend application for the HAR Analyzer platform.
 
 This application provides a modern UI for comparing HAR (HTTP Archive) files and visualizing request-level differences including headers, cookies, payloads, responses, and timing metrics.
 
 The frontend is architected around a normalized adapter layer to ensure scalability, maintainability, and future AI-readiness.
 
----
 
 # 🚀 Live Demo
-
 Frontend Deployment:
 https://har-analyzer-frontend-sepia.vercel.app/
 
 Backend API:
 https://har-analyzer-backend-hkyx.onrender.com
 
----
-
-# 📸 Demo
-
-## Suggested Screenshots
-- Upload flow
-- Summary dashboard
-- Modified request diff viewer
-- Endpoint drawer
-- Timing delta visualization
-- Cookie diffing
-
-## Suggested Demo Video
-Include:
-- uploading two HAR files
-- running comparison
-- searching/filtering
-- opening endpoint details
-- timing comparisons
-- cookie diffing
-
----
 
 # 🏗️ Frontend Architecture
-
 The frontend intentionally separates:
-
 - backend response contracts
 - normalization logic
 - presentation logic
 
 Architecture ownership:
-
-```txt
-Backend owns truth
-Adapter owns normalization
-UI owns presentation
-AI owns interpretation
+- Backend owns truth
+- Adapter owns normalization
+- UI owns presentation
+- AI owns interpretation
 
 🧠 Adapter Layer
-
 The frontend uses a dedicated normalization layer: src/adapters/diffAdapter.ts
 
 This layer transforms backend diff responses into stable UI-friendly contracts.
@@ -78,32 +48,32 @@ Benefits
 
 ✨ Features
 HAR Comparison
-    - upload two HAR files
-    - compare network traffic sessions
-    - analyze request-level differences
+- upload two HAR files
+- compare network traffic sessions
+- analyze request-level differences
 
 Request Diffing
 Supports:
-    - request headers
-    - request body
-    - cookies
-    - response headers
-    - response cookies
+- request headers
+- request body
+- cookies
+- response headers
+- response cookies
 
 Timing Analysis
 Visualizes:
-    - wait timing
-    - receive timing
-    - total timing
-    - timing deltas
-    - UI Features
-    - endpoint drawer
-    - filtering
-    - searching
-    - diff summaries
-    - export functionality
-    - deterministic rendering
-    - malformed data safety
+- wait timing
+- receive timing
+- total timing
+- timing deltas
+- UI Features
+- endpoint drawer
+- filtering
+- searching
+- diff summaries
+- export functionality
+- deterministic rendering
+- malformed data safety
 
 📂 Project Structure
 src/
@@ -144,60 +114,60 @@ Vite production builds are generated with:
 
 🧪 Current Stability Goals
 The frontend prioritizes:
-    - deterministic rendering
-    - normalized state contracts
-    - scalable architecture
-    - backend decoupling
-    - future AI compatibility
+- deterministic rendering
+- normalized state contracts
+- scalable architecture
+- backend decoupling
+- future AI compatibility
 
 🚀 Planned Frontend Improvements
 UI/UX
-    - nested JSON expand/collapse
-    - advanced filtering
-    - loading skeletons
-    - upload progress indicators
-    - better empty states
-    - improved error messaging
+- nested JSON expand/collapse
+- advanced filtering
+- loading skeletons
+- upload progress indicators
+- better empty states
+- improved error messaging
 
 Performance
-    - virtualization for large HAR files
-    - web worker processing
-    - memoization optimization
+- virtualization for large HAR files
+- web worker processing
+- memoization optimization
 
 Visualization
-    - request timeline charts
-    - waterfall visualizations
-    - expanded timing analytics
+- request timeline charts
+- waterfall visualizations
+- expanded timing analytics
 
 AI Readiness
-    - AI-generated summaries
-    - anomaly highlighting
-    - intelligent diff explanations
+- AI-generated summaries
+- anomaly highlighting
+- intelligent diff explanations
 
 Developer Experience
-    - automated testing
-    - Storybook integration
-    - improved type safety
-    - CI/CD pipeline integration
+- automated testing
+- Storybook integration
+- improved type safety
+- CI/CD pipeline integration
 
 🛡️ Error Handling Goals
 Future improvements include:
-    - categorized upload errors
-    - malformed HAR detection
-    - retry-safe frontend requests
-    - timeout handling
-    - better network failure messaging
+- categorized upload errors
+- malformed HAR detection
+- retry-safe frontend requests
+- timeout handling
+- better network failure messaging
 
 📈 Long-Term Vision
 HAR Analyzer is being designed as:
     an actively evolving production-grade HAR analysis platform
 
 Future roadmap areas include:
-    - AI-powered diff interpretation
-    - performance regression detection
-    - session persistence
-    - collaboration/sharing
-    - advanced analytics
+- AI-powered diff interpretation
+- performance regression detection
+- session persistence
+- collaboration/sharing
+- advanced analytics
 
 👨‍💻 Author
 Adam Chernitsky
