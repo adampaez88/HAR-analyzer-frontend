@@ -13,6 +13,8 @@ https://har-analyzer-frontend-sepia.vercel.app/
 Backend API:
 https://har-analyzer-backend-hkyx.onrender.com
 
+# Video Demo
+https://youtu.be/TpQ8wEkaQ7A
 
 # 🏗️ Frontend Architecture
 The frontend intentionally separates:
